@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Layers, CheckCircle2, Sparkles } from 'lucide-react';
 import { SkillCategory } from '../data/portfolioData';
+import { FloatingObjectsWrapper } from './FloatingObjectsWrapper';
 
 interface SkillsSectionProps {
   categories: SkillCategory[];
@@ -64,6 +65,11 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ categories }) => {
               </button>
             );
           })}
+        </div>
+
+        {/* Floating Architecture Prisms */}
+        <div className="mb-10">
+          <FloatingObjectsWrapper activeCategory={activeCategory} />
         </div>
 
         {/* Categories Grid */}

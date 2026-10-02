@@ -1,0 +1,5 @@
+# robots.txt for Shivank Maurya Portfolio
+User-agent: *
+Allow: /
+
+Sitemap: https://shivankmaurya.github.io/Main-Portfolio/sitemap.xml

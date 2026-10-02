@@ -1,16 +1,18 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import glsl from 'vite-plugin-glsl';
 import path from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
-  const isProduction = process.env.NODE_ENV === 'production';
   return {
-    base: isProduction ? '/Main-Portfolio/' : '/',
-    plugins: [react(), tailwindcss()],
+    base: '/',
+    plugins: [react(), tailwindcss(), glsl()],
     resolve: {
+      dedupe: ['react', 'react-dom'],
       alias: {
         '@': path.resolve(import.meta.dirname || '.', '.'),
+        '@gsap/react': path.resolve(import.meta.dirname || '.', 'src/core/useGSAP.ts'),
       },
     },
     build: {
@@ -19,6 +21,9 @@ export default defineConfig(() => {
           manualChunks(id) {
             if (id.includes('node_modules/three')) {
               return 'three-vendor';
+            }
+            if (id.includes('node_modules/gsap')) {
+              return 'gsap-vendor';
             }
             if (id.includes('node_modules/motion')) {
               return 'motion-vendor';
@@ -31,6 +36,10 @@ export default defineConfig(() => {
       }
     },
     server: {
+      host: '0.0.0.0',
+      port: 3000,
+      strictPort: true,
+      allowedHosts: true,
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },

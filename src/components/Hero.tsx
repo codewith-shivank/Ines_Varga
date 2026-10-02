@@ -13,8 +13,10 @@ import {
   Terminal,
 } from 'lucide-react';
 import { PortfolioData } from '../data/portfolioData';
+import { TextReveal } from './TextReveal';
+import { MagneticButton } from './MagneticButton';
 
-const Hero3D = lazy(() => import('./Hero3D').then(m => ({ default: m.Hero3D })));
+const HeroSceneWrapper = lazy(() => import('./HeroSceneWrapper').then(m => ({ default: m.HeroSceneWrapper })));
 
 interface HeroProps {
   data: PortfolioData;
@@ -134,15 +136,16 @@ export const Hero: React.FC<HeroProps> = ({ data }) => {
               </motion.div>
 
               {/* Name */}
-              <motion.h1
-                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05]"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              <TextReveal
+                as="h1"
+                type="lines"
+                sharpen={true}
+                triggerOnScroll={false}
+                delay={0.15}
+                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] font-display"
               >
-                <span className="text-zinc-900 dark:text-white">I'm </span>
-                <span className="text-gradient">{profile.name}</span>
-              </motion.h1>
+                {`I'm ${profile.name}`}
+              </TextReveal>
 
               {/* Tagline */}
               <motion.p
@@ -166,39 +169,45 @@ export const Hero: React.FC<HeroProps> = ({ data }) => {
                 transition={{ delay: 0.45, duration: 0.6 }}
               >
                 {/* Primary: View Projects */}
-                <motion.a
-                  href="#projects"
-                  whileHover={{ scale: 1.02, y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-500/25 flex items-center gap-2"
-                >
-                  <span>View My Work</span>
-                  <ArrowDown className="w-4 h-4" />
-                </motion.a>
+                <MagneticButton strength={0.3}>
+                  <motion.a
+                    href="#projects"
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-500/25 flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>View My Work</span>
+                    <ArrowDown className="w-4 h-4" />
+                  </motion.a>
+                </MagneticButton>
 
                 {/* Secondary: GitHub */}
-                <motion.a
-                  href="https://github.com/shivankmaurya"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ scale: 1.02, y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-5 py-3 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-semibold text-sm transition-all shadow-sm flex items-center gap-2 border border-zinc-700/50"
-                >
-                  <Github className="w-4 h-4" />
-                  <span>GitHub</span>
-                </motion.a>
+                <MagneticButton strength={0.25}>
+                  <motion.a
+                    href="https://github.com/shivankmaurya"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-5 py-3 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-semibold text-sm transition-all shadow-sm flex items-center gap-2 border border-zinc-700/50 cursor-pointer"
+                  >
+                    <Github className="w-4 h-4" />
+                    <span>GitHub</span>
+                  </motion.a>
+                </MagneticButton>
 
                 {/* Tertiary: Contact */}
-                <motion.a
-                  href="#contact"
-                  whileHover={{ scale: 1.02, y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-5 py-3 rounded-xl bg-white dark:bg-transparent text-zinc-900 dark:text-zinc-200 font-semibold text-sm border border-zinc-300 dark:border-zinc-700 hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all flex items-center gap-2"
-                >
-                  <MessageSquare className="w-4 h-4 text-indigo-500" />
-                  <span>Let's Talk</span>
-                </motion.a>
+                <MagneticButton strength={0.25}>
+                  <motion.a
+                    href="#contact"
+                    whileHover={{ scale: 1.02, y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-5 py-3 rounded-xl bg-white dark:bg-transparent text-zinc-900 dark:text-zinc-200 font-semibold text-sm border border-zinc-300 dark:border-zinc-700 hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4 text-indigo-500" />
+                    <span>Let's Talk</span>
+                  </motion.a>
+                </MagneticButton>
               </motion.div>
             </motion.div>
 
@@ -217,7 +226,7 @@ export const Hero: React.FC<HeroProps> = ({ data }) => {
                     </div>
                   }
                 >
-                  <Hero3D />
+                  <HeroSceneWrapper />
                 </Suspense>
               </div>
             </motion.div>

@@ -7,6 +7,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Code2, Headphones, GraduationCap, TrendingUp, Sparkles, ArrowRight } from 'lucide-react';
 import { PortfolioData } from '../data/portfolioData';
+import { TextReveal } from './TextReveal';
 
 interface AboutProps {
   data: PortfolioData;
@@ -63,9 +64,14 @@ export const About: React.FC<AboutProps> = ({ data }) => {
             <Sparkles className="w-3.5 h-3.5" />
             <span>ABOUT ME</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.15]">
+          <TextReveal
+            as="h2"
+            type="lines"
+            sharpen={true}
+            className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.15] font-display"
+          >
             Engineering software with empathy, resilience, and operational discipline.
-          </h2>
+          </TextReveal>
           <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
             I'm a Full-Stack developer who combines modern JavaScript/TypeScript software engineering with real production platform support experience.
           </p>
