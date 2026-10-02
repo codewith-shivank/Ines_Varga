@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Media, pointer, hardware concurrency, accessibility, and WebGL precision utilities.
+ * Media, pointer, hardware concurrency, accessibility, and WebGL safety utilities.
  */
 
 export type HardwareTier = 'high' | 'medium' | 'low';
@@ -12,44 +12,60 @@ export const HardwareTier = {
   LOW: 'low' as const,
 };
 
+let _polyfillApplied = false;
+
 /**
- * Polyfill for WebGL getShaderPrecisionFormat to guard against the known Three.js bug:
- * In WebGL 1.0 or constrained GPU environments, getShaderPrecisionFormat(FRAGMENT_SHADER, HIGH_FLOAT)
- * can return null. Three.js accesses .precision directly without null checking, throwing:
- * "TypeError: Cannot read properties of null (reading 'precision')".
- * This polyfill safely returns a valid format with precision 0, allowing Three.js to cleanly fall back to mediump.
+ * Robust polyfill for WebGL getShaderPrecisionFormat and getParameter(VERSION)
+ * Guards against the known Three.js bugs in WebGL 1.0 or headless/sandbox environments:
+ * 1. getShaderPrecisionFormat(FRAGMENT_SHADER, HIGH_FLOAT) returning null -> crash on .precision
+ * 2. getParameter(VERSION) returning null -> crash on .indexOf('WebGL')
+ * Uses native closure references and single-execution guard to prevent any prototype recursion.
  */
 export function ensureWebGLPrecisionPolyfill(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || _polyfillApplied) return;
+  _polyfillApplied = true;
 
-  const patch = (proto: any) => {
-    if (!proto || typeof proto.getShaderPrecisionFormat !== 'function') return;
-    if (proto.__three_precision_patched) return;
+  try {
+    if (typeof WebGLRenderingContext !== 'undefined') {
+      const proto = WebGLRenderingContext.prototype;
+      const nativeGetPrecision = proto.getShaderPrecisionFormat;
+      const nativeGetParameter = proto.getParameter;
 
-    const original = proto.getShaderPrecisionFormat;
-    proto.getShaderPrecisionFormat = function (shaderType: number, precisionType: number) {
-      try {
-        const result = original.call(this, shaderType, precisionType);
-        if (!result || typeof result.precision !== 'number') {
-          return { rangeMin: 0, rangeMax: 0, precision: 0 };
-        }
-        return result;
-      } catch {
-        return { rangeMin: 0, rangeMax: 0, precision: 0 };
+      if (typeof nativeGetPrecision === 'function') {
+        proto.getShaderPrecisionFormat = function (shaderType: number, precisionType: number) {
+          try {
+            const res = nativeGetPrecision.call(this, shaderType, precisionType);
+            if (!res || typeof res.precision !== 'number') {
+              return { rangeMin: 0, rangeMax: 0, precision: 0 };
+            }
+            return res;
+          } catch {
+            return { rangeMin: 0, rangeMax: 0, precision: 0 };
+          }
+        };
       }
-    };
-    proto.__three_precision_patched = true;
-  };
 
-  if (typeof WebGLRenderingContext !== 'undefined') {
-    patch(WebGLRenderingContext.prototype);
-  }
-  if (typeof WebGL2RenderingContext !== 'undefined') {
-    patch(WebGL2RenderingContext.prototype);
+      if (typeof nativeGetParameter === 'function') {
+        proto.getParameter = function (pname: number) {
+          try {
+            const res = nativeGetParameter.call(this, pname);
+            if (pname === this.VERSION && (!res || typeof res !== 'string')) {
+              return 'WebGL 1.0 (Safe Fallback)';
+            }
+            return res;
+          } catch {
+            if (pname === this.VERSION) return 'WebGL 1.0 (Safe Fallback)';
+            return null;
+          }
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('WebGL polyfill registration notice:', err);
   }
 }
 
-// Ensure polyfill is active immediately
+// Automatically invoke once on module import
 ensureWebGLPrecisionPolyfill();
 
 /**
@@ -109,6 +125,7 @@ let _cachedWebGLSupport: boolean | null = null;
 
 /**
  * Verifies whether WebGL is truly available and capable of running.
+ * Thoroughly validates context, version string, and precision format.
  */
 export function isWebGLSupported(_targetCanvas?: HTMLCanvasElement | null): boolean {
   if (typeof window === 'undefined') return false;
@@ -128,7 +145,22 @@ export function isWebGLSupported(_targetCanvas?: HTMLCanvasElement | null): bool
       return false;
     }
 
-    const loseContext = (gl as WebGLRenderingContext).getExtension('WEBGL_lose_context');
+    const webglCtx = gl as WebGLRenderingContext;
+
+    // Verify VERSION parameter exists and is valid string
+    const version = webglCtx.getParameter(webglCtx.VERSION);
+    if (!version || typeof version !== 'string') {
+      _cachedWebGLSupport = false;
+      return false;
+    }
+
+    // Verify precision format function works
+    if (typeof webglCtx.getShaderPrecisionFormat !== 'function') {
+      _cachedWebGLSupport = false;
+      return false;
+    }
+
+    const loseContext = webglCtx.getExtension('WEBGL_lose_context');
     loseContext?.loseContext();
 
     _cachedWebGLSupport = true;

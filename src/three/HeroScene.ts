@@ -39,6 +39,7 @@ export class HeroScene {
 
   // Cleanups
   private cleanups: Array<() => void> = [];
+  private isDisposed: boolean = false;
 
   constructor(options: HeroSceneOptions) {
     this.container = options.container;
@@ -260,6 +261,9 @@ export class HeroScene {
   }
 
   public dispose(): void {
+    if (this.isDisposed) return;
+    this.isDisposed = true;
+
     sceneManager.unregisterObject('hero-visual-crystal');
 
     this.cleanups.forEach((fn) => fn());

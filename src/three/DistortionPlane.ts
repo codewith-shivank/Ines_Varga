@@ -26,6 +26,7 @@ export class DistortionPlane {
   // Reusable static vectors to avoid frame loop allocations
   private mouse = new THREE.Vector2(0, 0);
   private targetMouse = new THREE.Vector2(0, 0);
+  private isDisposed = false;
 
   constructor(options: DistortionPlaneOptions) {
     this.id = options.id;
@@ -143,6 +144,11 @@ export class DistortionPlane {
   }
 
   public dispose(): void {
+    if (this.isDisposed) return;
+    this.isDisposed = true;
+
+    sceneManager.unregisterObject(this.id);
+
     this.domElement.removeEventListener('pointermove', this.handlePointerMove);
     this.domElement.removeEventListener('pointerleave', this.handlePointerLeave);
 

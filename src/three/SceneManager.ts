@@ -76,6 +76,11 @@ export class SceneManager {
     }
 
     try {
+      const testGl = this.canvas.getContext('webgl2') || this.canvas.getContext('webgl');
+      if (!testGl) return false;
+      const ver = (testGl as WebGLRenderingContext).getParameter((testGl as WebGLRenderingContext).VERSION);
+      if (!ver || typeof ver !== 'string') return false;
+
       this.renderer = new THREE.WebGLRenderer({
         canvas: this.canvas,
         alpha: true,
@@ -219,9 +224,9 @@ export class SceneManager {
     const item = this.objects.get(id);
     if (!item) return;
 
-    item.dispose?.();
-    this.scene.remove(item.group);
     this.objects.delete(id);
+    this.scene.remove(item.group);
+    item.dispose?.();
   }
 
   /**
@@ -314,11 +319,13 @@ export class SceneManager {
   public destroy(): void {
     this.stop();
 
-    this.objects.forEach((obj) => {
-      obj.dispose?.();
-      this.scene.remove(obj.group);
-    });
+    const objectsList = Array.from(this.objects.values());
     this.objects.clear();
+
+    objectsList.forEach((obj) => {
+      this.scene.remove(obj.group);
+      obj.dispose?.();
+    });
 
     if (this.ambientLattice) {
       this.ambientLattice.geometry.dispose();
