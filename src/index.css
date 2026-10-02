@@ -1,13 +1,113 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────
+   Design System — Creative Developer Portfolio
+   Palette: Near-black → Indigo → Violet → Rose
+   ────────────────────────────────────────────── */
+
+/* ── Custom Cursor ── */
+.custom-cursor {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(99, 102, 241, 0.5);
+  background-color: rgba(99, 102, 241, 0.12);
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  will-change: transform, width, height;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.3s ease,
+              border-width 0.3s ease,
+              border-color 0.3s ease;
+}
+
+.custom-cursor-inner,
+.custom-cursor-outer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #6366f1;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.custom-cursor-outer {
+  width: 10px;
+  height: 10px;
+  background-color: transparent;
+  border: 1.5px solid rgba(99, 102, 241, 0.5);
+  animation: cursor-spin 8s linear infinite;
+}
+
+@keyframes cursor-spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Hover / magnet states */
+.custom-cursor.hovered {
+  width: 36px;
+  height: 36px;
+  background-color: rgba(99, 102, 241, 0.18);
+  border-color: #a78bfa;
+}
+
+.custom-cursor.hovered .custom-cursor-inner {
+  background-color: #a78bfa;
+  width: 10px;
+  height: 10px;
+}
+
+.custom-cursor.hovered .custom-cursor-outer {
+  width: 22px;
+  height: 22px;
+  border-color: #a78bfa;
+  animation-duration: 12s;
+}
+
+.custom-cursor.magnet {
+  width: 48px;
+  height: 48px;
+  background-color: rgba(167, 139, 250, 0.22);
+  border-color: #c084fc;
+}
+
+.custom-cursor.magnet .custom-cursor-inner {
+  background-color: #c084fc;
+  width: 14px;
+  height: 14px;
+}
+
+.custom-cursor.magnet .custom-cursor-outer {
+  width: 30px;
+  height: 30px;
+  border-color: #c084fc;
+  animation-duration: 16s;
+}
+
+@media (max-width: 768px) {
+  .custom-cursor { display: none !important; }
+}
+
 @layer base {
   :root {
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   code, pre, .font-mono {
@@ -15,7 +115,89 @@
   }
 }
 
-/* Print styles for ATS resume printing */
+/* ── Scrollbar ── */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+/* ── Focus ── */
+*:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* ── Glass Utility ── */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+}
+.dark .glass {
+  background: rgba(9, 9, 11, 0.6);
+}
+
+/* ── Glow Accent ── */
+.glow-indigo {
+  box-shadow: 0 0 60px -12px rgba(99, 102, 241, 0.35);
+}
+.glow-violet {
+  box-shadow: 0 0 60px -12px rgba(139, 92, 246, 0.3);
+}
+
+/* ── Gradient Text Utility ── */
+.text-gradient {
+  background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Section Divider ── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.15), transparent);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Print ── */
 @media print {
   body {
     background-color: #ffffff !important;
@@ -41,32 +223,3 @@
     display: none !important;
   }
 }
-
-/* Custom subtle scrollbar */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #262626;
-  border-radius: 9999px;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #404040;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #d4d4d4;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a3a3a3;
-}
-

@@ -4,28 +4,20 @@
  */
 
 import React, { useState } from 'react';
-import { 
-  Mail, 
-  MapPin, 
-  Linkedin, 
-  Github, 
-  Send, 
-  Check, 
-  Copy, 
-  MessageSquare,
+import { motion } from 'motion/react';
+import {
+  Mail,
+  MapPin,
+  Linkedin,
+  Github,
+  Send,
+  Check,
+  Copy,
   Clock,
   Sparkles,
-  Settings,
-  ShieldCheck,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  RotateCcw,
-  ExternalLink
+  MessageSquare
 } from 'lucide-react';
 import { PortfolioData } from '../data/portfolioData';
-import { sendInquiry, EmailDispatchResult } from '../services/emailService';
-import { EmailSettingsModal } from './EmailSettingsModal';
 
 interface ContactSectionProps {
   data: PortfolioData;
@@ -40,11 +32,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ data }) => {
     message: ''
   });
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [dispatchResult, setDispatchResult] = useState<EmailDispatchResult | null>(null);
-  const [showAutoReplyLetter, setShowAutoReplyLetter] = useState(true);
-  const [copiedReceipt, setCopiedReceipt] = useState(false);
-  const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(profile.email);
@@ -52,355 +40,254 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ data }) => {
     setTimeout(() => setCopiedEmail(false), 2200);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleMailtoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      alert('Please fill out all required fields.');
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const message = formData.message.trim();
+
+    if (!name || !email || !message) {
+      setStatusMessage({
+        type: 'error',
+        text: 'Please fill in your name, email, and message.'
+      });
       return;
     }
 
-    setIsSubmitting(true);
+    setStatusMessage(null);
+    const subject = formData.subject.trim() || 'Full-Stack Developer Inquiry';
+    const body = `${name} (${email}) writes:\n\n${message}\n\n---\nSent from ${profile.name}'s portfolio`;
 
-    try {
-      const result = await sendInquiry({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        subject: formData.subject.trim() || 'FullStack MERN Engineering Inquiry',
-        message: formData.message.trim(),
-        position: 'FullStack MERN Developer',
-        type: 'contact_form'
-      });
+    const mailtoUrl = `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
 
-      setDispatchResult(result);
-    } catch (err: any) {
-      console.error('Inquiry dispatch error:', err);
-      // Fallback
-      alert('Could not dispatch online. Opening email client fallback.');
-      const mailtoUrl = `mailto:${profile.email}?subject=${encodeURIComponent(formData.subject || 'Inquiry')}&body=${encodeURIComponent(formData.message)}`;
-      window.location.href = mailtoUrl;
-    } finally {
-      setIsSubmitting(false);
-    }
+    setStatusMessage({
+      type: 'success',
+      text: 'Opening your default email client...'
+    });
   };
 
-  const handleCopyReceipt = () => {
-    if (!dispatchResult) return;
-    navigator.clipboard.writeText(dispatchResult.autoReplyPreview.body);
-    setCopiedReceipt(true);
-    setTimeout(() => setCopiedReceipt(false), 2200);
-  };
-
-  const handleResetForm = () => {
-    setFormData({ name: '', email: '', subject: '', message: '' });
-    setDispatchResult(null);
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (statusMessage) setStatusMessage(null);
   };
 
   return (
-    <section id="contact" className="py-20 border-b border-neutral-200 dark:border-neutral-800/80">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+    <section 
+      id="contact" 
+      className="py-24 lg:py-32 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-950/60 relative overflow-hidden"
+      aria-label="Contact Shivank Maurya"
+    >
+      {/* Background ambient glow */}
+      <div className="absolute top-1/2 left-10 w-96 h-96 bg-indigo-500/5 blur-[140px] pointer-events-none rounded-full" />
+
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8 relative z-10">
+
         {/* Section Header */}
-        <div className="max-w-2xl mb-12">
-          <div className="inline-flex items-center gap-2 text-xs font-mono text-cyan-600 dark:text-cyan-400 mb-2">
-            <span>07</span>
-            <span className="text-neutral-400 dark:text-neutral-600">/</span>
-            <span>GET_IN_TOUCH</span>
+        <div className="max-w-3xl mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-xs font-semibold font-mono tracking-wide">
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>GET IN TOUCH</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.15]">
             Let's discuss engineering opportunities.
           </h2>
-          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-            Open for full-time Full Stack and Frontend Engineering roles, technical support leadership, and project collaborations.
+          <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            Whether you have an open Full-Stack role, a project inquiry, or just want to connect — my inbox is open.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          
-          {/* Direct Verified Contact Channels */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+
+          {/* Left: Contact Info & Channels */}
           <div className="lg:col-span-5 space-y-6">
-            
-            <div className="p-6 rounded-2xl bg-white dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800/90 shadow-2xs space-y-5">
-              <h3 className="text-sm font-bold text-neutral-900 dark:text-white uppercase tracking-wider font-mono">
-                Direct Channels
-              </h3>
+            {/* Direct Email Card */}
+            <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                  Direct Email
+                </span>
+                <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Fast Response
+                </span>
+              </div>
 
-              {/* Email item */}
-              <div className="flex items-start justify-between gap-3 p-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-950/60 border border-neutral-200/80 dark:border-neutral-800">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-neutral-400 font-mono block">Email Address</span>
-                    <a 
-                      href={`mailto:${profile.email}`} 
-                      className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
-                    >
-                      {profile.email}
-                    </a>
-                  </div>
-                </div>
-
+              <div className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/70 dark:border-zinc-800">
+                <a
+                  href={`mailto:${profile.email}`}
+                  className="font-mono text-xs sm:text-sm font-semibold text-zinc-800 dark:text-zinc-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors truncate"
+                >
+                  {profile.email}
+                </a>
                 <button
                   onClick={handleCopyEmail}
-                  className="p-1.5 text-neutral-400 hover:text-neutral-800 dark:hover:text-white"
+                  className="p-2 rounded-xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-zinc-700 transition-colors shrink-0"
                   title="Copy email to clipboard"
                   aria-label="Copy email address"
                 >
-                  {copiedEmail ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                  {copiedEmail ? (
+                    <Check className="w-4 h-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
-              {/* Location item */}
-              <div className="flex items-center gap-3 p-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-950/60 border border-neutral-200/80 dark:border-neutral-800">
-                <div className="w-8 h-8 rounded-lg bg-neutral-200/60 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center shrink-0">
-                  <MapPin className="w-4 h-4" />
-                </div>
-                <div>
-                  <span className="text-xs text-neutral-400 font-mono block">Location</span>
-                  <span className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white">
-                    {profile.location}
-                  </span>
-                </div>
-              </div>
-
-              {/* Professional Links */}
-              <div className="pt-2 border-t border-neutral-100 dark:border-neutral-800/80 space-y-2">
-                <span className="text-xs font-mono text-neutral-400 block mb-2">Verified Profiles:</span>
-                
-                <a
-                  href="https://www.linkedin.com/in/shivank-maurya-21257a303/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-2.5 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-xs font-medium text-neutral-700 dark:text-neutral-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <Linkedin className="w-4 h-4 text-cyan-600" />
-                    <span>LinkedIn Profile</span>
-                  </span>
-                  <span className="text-neutral-400 text-[11px] font-mono">/in/shivank-maurya-21257a303/</span>
-                </a>
-
-                <a
-                  href="https://github.com/shivankmaurya"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-2.5 rounded-lg border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-xs font-medium text-neutral-700 dark:text-neutral-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <Github className="w-4 h-4 text-neutral-800 dark:text-white" />
-                    <span>GitHub Profile</span>
-                  </span>
-                  <span className="text-neutral-400 text-[11px] font-mono">github.com/shivankmaurya</span>
-                </a>
-              </div>
-
-            </div>
-
-            {/* Recruiter SLA Box */}
-            <div className="p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20 text-xs text-neutral-600 dark:text-neutral-400 space-y-1">
-              <span className="font-semibold text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-cyan-500" />
-                Response Commitment
-              </span>
-              <p>
-                As someone with strict customer SLA background, I respond to recruiter inquiries and technical discussions within 24 business hours.
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Usually responds within 24 hours for engineering roles and collaborations.
               </p>
             </div>
 
+            {/* Quick Links */}
+            <div className="grid grid-cols-2 gap-4">
+              <a
+                href="https://www.linkedin.com/in/shivank-maurya-21257a303/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-5 rounded-2xl bg-white dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Linkedin className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    LinkedIn
+                  </div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Connect professionally &rarr;
+                  </div>
+                </div>
+              </a>
+
+              <a
+                href="https://github.com/shivankmaurya"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-5 rounded-2xl bg-white dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                  <Github className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    GitHub
+                  </div>
+                  <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Explore repositories &rarr;
+                  </div>
+                </div>
+              </a>
+            </div>
+
+            {/* Location & Status Card */}
+            <div className="p-5 rounded-2xl bg-zinc-100/70 dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/80 flex items-center gap-3.5 text-xs text-zinc-600 dark:text-zinc-400">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-semibold text-zinc-900 dark:text-zinc-200">Based in {profile.location}</span>
+                <p className="text-[11px] text-zinc-500 mt-0.5">Open to Remote, Hybrid, and On-site opportunities</p>
+              </div>
+            </div>
           </div>
 
-          {/* Direct Message Form or Dispatch Confirmation */}
+          {/* Right: Message Form */}
           <div className="lg:col-span-7">
-            <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800/90 shadow-2xs">
-              
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-base font-bold text-neutral-900 dark:text-white">
-                    Send an Inquiry
-                  </h3>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                    Direct routing with instant ticket confirmation & automated auto-reply
-                  </p>
-                </div>
+            <form
+              onSubmit={handleMailtoSubmit}
+              className="p-8 sm:p-10 rounded-3xl bg-white dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 shadow-sm space-y-5"
+            >
+              <h3 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">
+                Send a Message
+              </h3>
 
-                <button
-                  type="button"
-                  onClick={() => setIsEmailSettingsOpen(true)}
-                  className="px-2.5 py-1 text-xs rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-300 flex items-center gap-1.5 transition-colors"
-                  title="Configure EmailJS or view Auto-Responder settings"
+              {statusMessage && (
+                <div
+                  className={`p-3.5 rounded-xl text-xs font-medium ${
+                    statusMessage.type === 'error'
+                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                      : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                  }`}
                 >
-                  <Settings className="w-3.5 h-3.5 text-cyan-500" />
-                  <span className="hidden sm:inline font-mono">Email.js Setup</span>
-                </button>
-              </div>
-
-              {/* SUCCESS AUTO-REPLY RECEIPT CARD */}
-              {dispatchResult ? (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                        <CheckCircle2 className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs sm:text-sm">
-                            Inquiry Dispatched & Auto-Reply Generated
-                          </span>
-                          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 font-semibold">
-                            Ticket #{dispatchResult.ticketId}
-                          </span>
-                        </div>
-                        <p className="text-xs mt-1 text-emerald-700 dark:text-emerald-300/90 leading-relaxed">
-                          Thank you, <strong>{dispatchResult.autoReplyPreview.recipientName}</strong>. Your message has been logged in Shivank's priority queue. An automated confirmation receipt was generated for <strong>{dispatchResult.autoReplyPreview.recipientEmail}</strong> with guaranteed 24 business hour turnaround.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Collapsible Auto-Reply Letter Preview */}
-                  <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setShowAutoReplyLetter(!showAutoReplyLetter)}
-                      className="w-full p-3.5 bg-neutral-50 dark:bg-neutral-950/60 flex items-center justify-between text-xs font-semibold text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-cyan-500" />
-                        <span>View Automated Auto-Reply Confirmation Copy</span>
-                      </span>
-                      {showAutoReplyLetter ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-
-                    {showAutoReplyLetter && (
-                      <div className="p-4 bg-neutral-950 text-neutral-200 font-mono text-[11px] leading-relaxed whitespace-pre-wrap border-t border-neutral-800 max-h-72 overflow-y-auto">
-                        {dispatchResult.autoReplyPreview.body}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions after submission */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={handleCopyReceipt}
-                      className="px-3.5 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-200 text-xs font-medium flex items-center gap-1.5 transition-colors"
-                    >
-                      {copiedReceipt ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copiedReceipt ? 'Copied to Clipboard' : 'Copy Confirmation Receipt'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleResetForm}
-                      className="px-4 py-2 rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 text-xs font-semibold flex items-center gap-1.5 hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors shadow-2xs"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Send Another Inquiry</span>
-                    </button>
-                  </div>
+                  {statusMessage.text}
                 </div>
-              ) : (
-                /* INQUIRY FORM */
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                        Your Name *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="e.g. Alex Hunter (Recruiter)"
-                        className="w-full px-3.5 py-2.5 text-xs rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                        Your Email *
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="alex@company.com"
-                        className="w-full px-3.5 py-2.5 text-xs rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                      Subject
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.subject}
-                      onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                      placeholder="FullStack MERN Opportunity at [Company]"
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                      Message *
-                    </label>
-                    <textarea
-                      rows={4}
-                      required
-                      value={formData.message}
-                      onChange={e => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Details about the role, technical requirements, or collaboration..."
-                      className="w-full px-3.5 py-2.5 text-xs rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                    />
-                  </div>
-
-                  <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-neutral-400">
-                      <Sparkles className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
-                      <span>Instant automated auto-reply &amp; 24h SLA response</span>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="px-5 py-2.5 rounded-lg bg-cyan-600 dark:bg-cyan-500 hover:bg-cyan-700 dark:hover:bg-cyan-400 text-white dark:text-neutral-950 font-semibold text-xs shadow-2xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          <span>Routing &amp; Generating Receipt...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-3.5 h-3.5" />
-                          <span>Send Inquiry</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
               )}
 
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="contact-name" className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    Your Name *
+                  </label>
+                  <input
+                    id="contact-name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="e.g. Alex Morgan"
+                    className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="contact-email" className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    Your Email *
+                  </label>
+                  <input
+                    id="contact-email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="alex@company.com"
+                    className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="contact-subject" className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Subject
+                </label>
+                <input
+                  id="contact-subject"
+                  type="text"
+                  value={formData.subject}
+                  onChange={(e) => handleInputChange('subject', e.target.value)}
+                  placeholder="Full-Stack Developer Role / Project Consultation"
+                  className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="contact-message" className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Message *
+                </label>
+                <textarea
+                  id="contact-message"
+                  required
+                  rows={4}
+                  value={formData.message}
+                  onChange={(e) => handleInputChange('message', e.target.value)}
+                  placeholder="Hi Shivank, I'd like to talk about..."
+                  className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/80 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Send via Email Client</span>
+              </button>
+            </form>
           </div>
 
         </div>
 
       </div>
-
-      {/* EmailJS & Auto-Responder Settings Modal */}
-      <EmailSettingsModal
-        isOpen={isEmailSettingsOpen}
-        onClose={() => setIsEmailSettingsOpen(false)}
-        userEmail={profile.email}
-      />
     </section>
   );
 };

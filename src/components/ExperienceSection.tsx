@@ -4,17 +4,14 @@
  */
 
 import React from 'react';
+import { motion } from 'motion/react';
 import { 
-  Briefcase, 
+  Building2,
   MapPin, 
   Calendar, 
   CheckCircle2, 
-  TrendingDown, 
-  Users, 
-  Clock, 
-  FileCheck2,
-  Building2,
-  ArrowUpRight
+  TrendingUp,
+  Briefcase
 } from 'lucide-react';
 import { Experience } from '../data/portfolioData';
 
@@ -24,121 +21,136 @@ interface ExperienceSectionProps {
 
 export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ experienceList }) => {
   return (
-    <section id="experience" className="py-20 border-b border-neutral-200 dark:border-neutral-800/80">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section 
+      id="experience" 
+      className="py-24 lg:py-32 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-950/60 relative overflow-hidden"
+      aria-label="Work Experience"
+    >
+      {/* Ambient background glow */}
+      <div className="absolute top-1/2 -right-20 w-96 h-96 bg-indigo-500/5 blur-[130px] pointer-events-none rounded-full" />
+
+      <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <div className="max-w-2xl mb-12">
-          <div className="inline-flex items-center gap-2 text-xs font-mono text-cyan-600 dark:text-cyan-400 mb-2">
-            <span>03</span>
-            <span className="text-neutral-400 dark:text-neutral-600">/</span>
-            <span>PRODUCTION_EXPERIENCE</span>
+        <div className="max-w-3xl mb-16 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 text-xs font-semibold font-mono tracking-wide">
+            <Briefcase className="w-3.5 h-3.5" />
+            <span>PRODUCTION EXPERIENCE</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">
-            Work Experience & Operational Impact
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.15]">
+            Operational impact & production discipline.
           </h2>
-          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-            Real customer operations, high-SLA platform support, and technical root-cause problem solving.
+          <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            Real customer operations, high-SLA food & quick-commerce platform support, and systematic root-cause incident troubleshooting.
           </p>
         </div>
 
         {/* Timeline Container */}
-        <div className="relative pl-6 sm:pl-8 border-l border-neutral-200 dark:border-neutral-800 space-y-12">
+        <div className="relative pl-6 sm:pl-8 border-l-2 border-indigo-500/25 dark:border-zinc-800 space-y-12">
           {experienceList.map((exp) => (
-            <div key={exp.id} className="relative group">
-              
+            <motion.div 
+              key={exp.id} 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.6 }}
+              className="relative group"
+            >
               {/* Timeline Indicator Dot */}
-              <div className="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-cyan-500 border-4 border-white dark:border-neutral-950 shadow-sm" />
+              <div className="absolute -left-[31px] sm:-left-[39px] top-2 w-5 h-5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 border-4 border-white dark:border-zinc-950 shadow-md" />
 
               {/* Main Experience Card */}
-              <div className="p-6 sm:p-7 rounded-2xl bg-white dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800/90 hover:border-neutral-300 dark:hover:border-neutral-700/80 transition-all shadow-2xs">
+              <div className="p-7 sm:p-9 rounded-3xl bg-white dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 hover:border-indigo-500/40 dark:hover:border-indigo-500/40 transition-all duration-300 shadow-sm hover:shadow-xl">
                 
                 {/* Header metadata */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-neutral-100 dark:border-neutral-800/80">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-6 border-b border-zinc-100 dark:border-zinc-800">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-lg font-bold text-neutral-900 dark:text-white">
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <h3 className="text-2xl font-bold text-zinc-900 dark:text-white">
                         {exp.title}
                       </h3>
                       {exp.isCurrent && (
-                        <span className="px-2 py-0.5 text-[11px] font-mono rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium">
+                        <span className="px-3 py-1 text-xs font-mono font-semibold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
                           Current Role
                         </span>
                       )}
                     </div>
                     
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-600 dark:text-neutral-400">
-                      <span className="font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-1">
-                        <Building2 className="w-3.5 h-3.5 text-neutral-400" />
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                        <Building2 className="w-4 h-4 text-indigo-500" />
                         {exp.company}
                       </span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-neutral-400" />
+                      <span>&bull;</span>
+                      <span className="flex items-center gap-1.5">
+                        <MapPin className="w-4 h-4 text-zinc-400" />
                         {exp.location}
                       </span>
-                      <span>·</span>
-                      <span className="text-cyan-700 dark:text-cyan-400 font-medium">
+                      <span>&bull;</span>
+                      <span className="text-indigo-600 dark:text-indigo-400 font-mono font-semibold">
                         Platform: {exp.platformSupported}
                       </span>
                     </div>
                   </div>
 
-                  <div className="shrink-0 flex items-center gap-1.5 text-xs font-mono text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800/60 px-3 py-1.5 rounded-md border border-neutral-200/80 dark:border-neutral-700/60 self-start sm:self-auto">
-                    <Calendar className="w-3.5 h-3.5 text-neutral-400" />
+                  <div className="shrink-0 flex items-center gap-2 text-xs font-mono font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800/80 px-4 py-2 rounded-xl border border-zinc-200/80 dark:border-zinc-700/60 self-start lg:self-auto">
+                    <Calendar className="w-4 h-4 text-indigo-500" />
                     <span>{exp.period}</span>
                   </div>
                 </div>
 
                 {/* Summary */}
-                <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed mb-6">
+                <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-300 leading-relaxed mb-6 font-normal">
                   {exp.summary}
                 </p>
 
-                {/* Measurable Verified Metrics Bar */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-950/60 border border-neutral-200/80 dark:border-neutral-800">
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                   {exp.metrics.map((metric, i) => (
-                    <div key={i} className="flex flex-col">
-                      <span className="text-lg sm:text-xl font-bold font-mono text-neutral-900 dark:text-white">
-                        {metric.value}
-                      </span>
-                      <span className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium">
-                        {metric.label}
-                      </span>
+                    <div key={i} className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200/70 dark:border-zinc-800 flex items-center gap-3.5">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <TrendingUp className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-zinc-900 dark:text-white leading-none mb-1">
+                          {metric.value}
+                        </div>
+                        <div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                          {metric.label}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Key Bullet Highlights */}
+                {/* Highlights List */}
                 <div className="space-y-2.5 mb-6">
-                  <h4 className="text-xs font-semibold font-mono text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-                    Key Responsibilities & System Outcomes:
-                  </h4>
-                  <ul className="space-y-2">
-                    {exp.highlights.map((h, i) => (
-                      <li key={i} className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">
-                        <CheckCircle2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
-                        <span>{h}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2">
+                    Key Responsibilities & Operational Actions
+                  </div>
+                  {exp.highlights.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-3 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Skills Used */}
-                <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800/80 flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs font-mono text-neutral-400 mr-1">Competencies:</span>
-                  {exp.skillsUsed.map((sk) => (
-                    <span 
-                      key={sk} 
-                      className="px-2 py-0.5 text-xs font-mono rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700/60"
+                <div className="pt-5 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-mono text-zinc-400 mr-2">Skills Applied:</span>
+                  {exp.skillsUsed.map((skill) => (
+                    <span
+                      key={skill}
+                      className="px-2.5 py-1 rounded-lg text-xs font-mono bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-700/60"
                     >
-                      {sk}
+                      {skill}
                     </span>
                   ))}
                 </div>
 
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 

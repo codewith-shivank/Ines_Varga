@@ -3,155 +3,228 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { 
-  ArrowDown, 
-  FileText, 
-  FolderGit2, 
-  Linkedin, 
-  Github, 
-  Mail, 
-  MapPin, 
-  CheckCircle2, 
-  Copy, 
-  Check 
+import React, { useState, useRef, Suspense, lazy } from 'react';
+import { motion, useScroll, useSpring } from 'motion/react';
+import {
+  ArrowDown,
+  Github,
+  MessageSquare,
+  MapPin,
+  Terminal,
 } from 'lucide-react';
 import { PortfolioData } from '../data/portfolioData';
 
+const Hero3D = lazy(() => import('./Hero3D').then(m => ({ default: m.Hero3D })));
+
 interface HeroProps {
   data: PortfolioData;
-  onOpenResume: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ data, onOpenResume }) => {
-  const { profile, socialLinks } = data;
-  const [copiedEmail, setCopiedEmail] = useState(false);
+// Typing animation
+const ROLES = [
+  'FullStack MERN Developer',
+  'React & TypeScript Engineer',
+  'Node.js & Express Developer',
+  'MongoDB & PostgreSQL Dev',
+];
 
-  const handleCopyEmail = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigator.clipboard.writeText(profile.email);
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2200);
-  };
+function useTypingAnimation(words: string[], typingSpeed = 65, pauseMs = 2000) {
+  const [displayed, setDisplayed] = useState('');
+  const [wordIdx, setWordIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+
+  React.useEffect(() => {
+    const current = words[wordIdx];
+    let timeout: ReturnType<typeof setTimeout>;
+
+    if (!deleting && charIdx < current.length) {
+      timeout = setTimeout(() => setCharIdx(c => c + 1), typingSpeed);
+    } else if (!deleting && charIdx === current.length) {
+      timeout = setTimeout(() => setDeleting(true), pauseMs);
+    } else if (deleting && charIdx > 0) {
+      timeout = setTimeout(() => setCharIdx(c => c - 1), typingSpeed / 2);
+    } else if (deleting && charIdx === 0) {
+      setDeleting(false);
+      setWordIdx(i => (i + 1) % words.length);
+    }
+
+    setDisplayed(current.slice(0, charIdx));
+    return () => clearTimeout(timeout);
+  }, [charIdx, deleting, wordIdx, words, typingSpeed, pauseMs]);
+
+  return displayed;
+}
+
+export const Hero: React.FC<HeroProps> = ({ data }) => {
+  const { profile } = data;
+  const heroRef = useRef<HTMLElement>(null);
+  const typedRole = useTypingAnimation(ROLES);
+
+  // Scroll progress bar
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   return (
-    <section 
-      id="hero" 
-      className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden border-b border-neutral-200 dark:border-neutral-800/80"
-      aria-label="Hero Introduction"
-    >
-      {/* Subtle background ambient grid (no neon slop) */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:24px_24px]" />
-      
-      {/* Controlled subtle glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-cyan-500/5 dark:bg-cyan-500/10 blur-3xl rounded-full pointer-events-none" />
+    <>
+      {/* Reading progress bar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 origin-left z-50 pointer-events-none"
+        style={{ scaleX }}
+      />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Availability & Location Bar */}
-        <div className="inline-flex flex-wrap items-center gap-2 mb-6 text-xs text-neutral-600 dark:text-neutral-400">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            {profile.availability}
-          </span>
-          <span className="hidden sm:inline text-neutral-400 dark:text-neutral-600">·</span>
-          <span className="inline-flex items-center gap-1 text-neutral-600 dark:text-neutral-400 font-medium">
-            <MapPin className="w-3.5 h-3.5 text-neutral-400" />
-            {profile.location}
-          </span>
-        </div>
+      <section
+        ref={heroRef}
+        id="hero"
+        className="relative pt-28 pb-20 md:pt-36 md:pb-28 lg:pt-40 lg:pb-32 overflow-hidden"
+        aria-label="Hero Introduction"
+      >
+        {/* Background effects */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.02] dark:opacity-[0.04] bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:32px_32px]" />
+        <div className="absolute top-1/4 -left-32 w-[500px] h-[500px] bg-indigo-500/8 dark:bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-violet-500/6 dark:bg-violet-500/8 blur-[100px] rounded-full pointer-events-none" />
 
-        {/* Primary Headline */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 dark:text-white leading-[1.15] mb-4">
-          Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-700 dark:from-white dark:via-neutral-200 dark:to-neutral-400">{profile.name}</span>.
-          <span className="block mt-2 text-2xl sm:text-4xl lg:text-5xl font-semibold text-neutral-700 dark:text-neutral-300">
-            FullStack MERN developer building modern, scalable web experiences.
-          </span>
-        </h1>
+        <div className="max-w-6xl mx-auto px-5 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
-        {/* Supporting Text */}
-        <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-300 max-w-2xl leading-relaxed mb-8">
-          Bridging the modern JavaScript/TypeScript ecosystem (<strong className="font-semibold text-neutral-900 dark:text-neutral-100">React.js, Next.js, Node.js, Express, MongoDB</strong>) with high-volume technical support experience. Focused on architecting clean, maintainable user interfaces and solving real customer problems.
-        </p>
-
-        {/* Action CTAs */}
-        <div className="flex flex-wrap items-center gap-3 mb-10">
-          <a
-            href="#projects"
-            className="px-5 py-2.5 rounded-lg bg-cyan-600 dark:bg-cyan-500 text-white font-medium text-sm hover:bg-cyan-700 dark:hover:bg-cyan-400 dark:text-neutral-950 transition-all shadow-sm flex items-center gap-2 group"
-          >
-            <FolderGit2 className="w-4 h-4" />
-            <span>View Projects</span>
-            <ArrowDown className="w-3.5 h-3.5 group-hover:translate-y-0.5 transition-transform" />
-          </a>
-
-          <button
-            onClick={onOpenResume}
-            className="px-5 py-2.5 rounded-lg bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 text-white font-medium text-sm border border-neutral-700/60 transition-all shadow-sm flex items-center gap-2"
-          >
-            <FileText className="w-4 h-4 text-cyan-400" />
-            <span>Download ATS Resume</span>
-          </button>
-
-          <a
-            href="#contact"
-            className="px-4 py-2.5 rounded-lg bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-900 text-neutral-700 dark:text-neutral-300 font-medium text-sm border border-neutral-300 dark:border-neutral-800 transition-all flex items-center gap-2"
-          >
-            <Mail className="w-4 h-4 text-neutral-400" />
-            <span>Contact Me</span>
-          </a>
-        </div>
-
-        {/* Verified Links & Quick Copy Email Strip */}
-        <div className="pt-6 border-t border-neutral-200 dark:border-neutral-800/80 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4 text-xs font-mono text-neutral-500 dark:text-neutral-400">
-            <span className="font-sans font-medium text-neutral-700 dark:text-neutral-300">Connect:</span>
-            
-            <a
-              href="https://www.linkedin.com/in/shivank-maurya-21257a303/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
-              aria-label="LinkedIn Profile"
+            {/* Left Content */}
+            <motion.div
+              className="lg:col-span-7 space-y-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Linkedin className="w-3.5 h-3.5" />
-              <span>LinkedIn</span>
-            </a>
-
-            <a
-              href="https://github.com/shivankmaurya"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
-              aria-label="GitHub Profile"
-            >
-              <Github className="w-3.5 h-3.5" />
-              <span>GitHub</span>
-            </a>
-          </div>
-
-          {/* Quick Copy Email widget */}
-          <div className="inline-flex items-center gap-2 bg-neutral-100 dark:bg-neutral-900/80 border border-neutral-200 dark:border-neutral-800 px-3 py-1.5 rounded-md text-xs">
-            <Mail className="w-3.5 h-3.5 text-cyan-500" />
-            <span className="font-mono text-neutral-700 dark:text-neutral-300">{profile.email}</span>
-            <button
-              onClick={handleCopyEmail}
-              className="ml-1 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
-              title="Copy email address"
-              aria-label="Copy email address"
-            >
-              {copiedEmail ? (
-                <span className="flex items-center gap-1 text-emerald-500 font-sans font-medium text-[11px]">
-                  <Check className="w-3 h-3" /> Copied
+              {/* Status badges */}
+              <motion.div 
+                className="flex flex-wrap items-center gap-2.5"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-xs font-medium">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  Open to Opportunities
                 </span>
-              ) : (
-                <Copy className="w-3 h-3" />
-              )}
-            </button>
+
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-medium">
+                  <MapPin className="w-3 h-3 text-indigo-500" />
+                  {profile.location}
+                </span>
+              </motion.div>
+
+              {/* Typed role */}
+              <motion.div
+                className="flex items-center gap-2 text-sm font-mono text-indigo-600 dark:text-indigo-400 font-semibold"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+              >
+                <Terminal className="w-4 h-4 shrink-0" />
+                <span className="min-w-[220px]">
+                  {typedRole}
+                  <span className="inline-block w-[2px] h-[1em] bg-indigo-500 ml-0.5 animate-pulse align-middle" />
+                </span>
+              </motion.div>
+
+              {/* Name */}
+              <motion.h1
+                className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <span className="text-zinc-900 dark:text-white">I'm </span>
+                <span className="text-gradient">{profile.name}</span>
+              </motion.h1>
+
+              {/* Tagline */}
+              <motion.p
+                className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 leading-relaxed max-w-lg"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.7 }}
+              >
+                I build{' '}
+                <span className="font-semibold text-zinc-900 dark:text-white">
+                  performant web applications
+                </span>{' '}
+                with React, TypeScript & the MERN stack — backed by real-world production operations experience.
+              </motion.p>
+
+              {/* CTAs — 3 max */}
+              <motion.div
+                className="flex flex-wrap items-center gap-3 pt-2"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45, duration: 0.6 }}
+              >
+                {/* Primary: View Projects */}
+                <motion.a
+                  href="#projects"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-500/25 flex items-center gap-2"
+                >
+                  <span>View My Work</span>
+                  <ArrowDown className="w-4 h-4" />
+                </motion.a>
+
+                {/* Secondary: GitHub */}
+                <motion.a
+                  href="https://github.com/shivankmaurya"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-5 py-3 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-semibold text-sm transition-all shadow-sm flex items-center gap-2 border border-zinc-700/50"
+                >
+                  <Github className="w-4 h-4" />
+                  <span>GitHub</span>
+                </motion.a>
+
+                {/* Tertiary: Contact */}
+                <motion.a
+                  href="#contact"
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-5 py-3 rounded-xl bg-white dark:bg-transparent text-zinc-900 dark:text-zinc-200 font-semibold text-sm border border-zinc-300 dark:border-zinc-700 hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all flex items-center gap-2"
+                >
+                  <MessageSquare className="w-4 h-4 text-indigo-500" />
+                  <span>Let's Talk</span>
+                </motion.a>
+              </motion.div>
+            </motion.div>
+
+            {/* Right: 3D Visual */}
+            <motion.div
+              className="lg:col-span-5 relative flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="w-full relative rounded-2xl overflow-hidden">
+                <Suspense
+                  fallback={
+                    <div className="w-full min-h-[320px] lg:min-h-[420px] flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin" />
+                    </div>
+                  }
+                >
+                  <Hero3D />
+                </Suspense>
+              </div>
+            </motion.div>
+
           </div>
         </div>
-
-      </div>
-    </section>
+      </section>
+    </>
   );
 };

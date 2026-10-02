@@ -7,16 +7,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Printer, 
-  Download, 
   Copy, 
   Check, 
   FileText, 
   Mail, 
   MapPin, 
-  ExternalLink,
-  Linkedin,
-  Github,
-  CheckCircle2
+  Linkedin, 
+  Github, 
+  CheckCircle2 
 } from 'lucide-react';
 import { PortfolioData } from '../data/portfolioData';
 
@@ -55,7 +53,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, data 
   const handleCopyPlainText = () => {
     const plainText = `
 SHIVANK MAURYA
-Full Stack Developer | Customer Support & Technical Support
+FullStack MERN Developer with Production Support & Operational Discipline
 Location: ${profile.location}
 Email: ${profile.email}
 LinkedIn: https://www.linkedin.com/in/shivank-maurya-21257a303/
@@ -79,15 +77,19 @@ ${e.highlights.map(h => `- ${h}`).join('\n')}
 Skills Used: ${e.skillsUsed.join(', ')}
 `).join('\n')}
 
-PROJECTS
+TECHNICAL PROJECTS
 ${projects.map(p => `
 ${p.title} (${p.category}) - Role: ${p.role}
 Technologies: ${p.technologies.join(', ')}
 Overview: ${p.description}
 Problem Solved: ${p.problemSolved}
 Solution: ${p.solution}
+Architecture: ${p.architecture.join('; ')}
 Key Features:
 ${p.keyFeatures.map(f => `- ${f}`).join('\n')}
+Outcomes & Results: ${p.result.join('; ')}
+${p.githubUrl ? `GitHub: ${p.githubUrl}` : ''}
+${p.liveUrl ? `Live URL: ${p.liveUrl}` : ''}
 `).join('\n')}
 
 EDUCATION
@@ -120,12 +122,12 @@ ${certifications.map(c => `• ${c.title} - ${c.issuer} (${c.credentialType})`).
       />
 
       {/* Main Container */}
-      <div className="relative w-full max-w-4xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl overflow-hidden my-4 z-10 animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-4xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl shadow-2xl overflow-hidden my-4 z-10 animate-in fade-in zoom-in-95 duration-150">
         
         {/* Top Control Bar */}
-        <div className="px-6 py-3.5 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-neutral-50 dark:bg-neutral-950/70 no-print">
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-neutral-50 dark:bg-neutral-950/70 no-print">
           <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-cyan-500" />
+            <FileText className="w-4 h-4 text-indigo-500" />
             <h2 id="resume-modal-title" className="text-sm font-bold text-neutral-900 dark:text-white">
               Official ATS Résumé Document
             </h2>
@@ -134,13 +136,13 @@ ${certifications.map(c => `• ${c.title} - ${c.issuer} (${c.credentialType})`).
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyPlainText}
-              className="px-3 py-1.5 text-xs font-mono rounded-md border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 text-xs font-mono rounded-xl border border-neutral-200 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-1.5 transition-colors shadow-2xs"
               title="Copy plain-text formatted résumé for ATS job applications"
             >
               {copiedText ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-emerald-500" />
-                  <span className="text-emerald-600 dark:text-emerald-400">Copied Text</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">Copied Plain Text</span>
                 </>
               ) : (
                 <>
@@ -152,16 +154,16 @@ ${certifications.map(c => `• ${c.title} - ${c.issuer} (${c.credentialType})`).
 
             <button
               onClick={handlePrint}
-              className="px-3 py-1.5 text-xs font-semibold rounded-md bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-white flex items-center gap-1.5 transition-colors shadow-2xs"
+              className="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-indigo-600 dark:hover:bg-indigo-400 dark:hover:text-white flex items-center gap-1.5 transition-colors shadow-xs"
               title="Print document or Save as PDF"
             >
-              <Printer className="w-3.5 h-3.5 text-cyan-400 dark:text-cyan-600" />
+              <Printer className="w-3.5 h-3.5 text-indigo-400 dark:text-indigo-600" />
               <span>Print / Save PDF</span>
             </button>
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+              className="p-1.5 rounded-xl text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
               aria-label="Close résumé dialog"
             >
               <X className="w-5 h-5" />
@@ -222,7 +224,7 @@ ${certifications.map(c => `• ${c.title} - ${c.issuer} (${c.credentialType})`).
             <div className="space-y-1.5 text-xs text-neutral-800 dark:text-neutral-200 font-sans">
               {skills.map((category) => (
                 <div key={category.name} className="flex flex-col sm:flex-row sm:items-start gap-1">
-                  <span className="font-semibold text-neutral-900 dark:text-white w-36 shrink-0">
+                  <span className="font-semibold text-neutral-900 dark:text-white w-40 shrink-0">
                     {category.name}:
                   </span>
                   <span className="text-neutral-600 dark:text-neutral-300">
@@ -245,7 +247,7 @@ ${certifications.map(c => `• ${c.title} - ${c.issuer} (${c.credentialType})`).
                   <span className="font-mono text-xs font-normal text-neutral-500">{exp.period} | {exp.location}</span>
                 </div>
                 <div className="text-xs text-cyan-700 dark:text-cyan-400 font-medium mb-1.5">
-                  Platform: {exp.platformSupported}
+                  Platform Supported: {exp.platformSupported}
                 </div>
                 <ul className="list-disc pl-4 space-y-1 text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed">
                   {exp.highlights.map((h, i) => (
@@ -259,20 +261,23 @@ ${certifications.map(c => `• ${c.title} - ${c.issuer} (${c.credentialType})`).
           {/* Section: Projects */}
           <div className="mb-6">
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 dark:text-white border-b border-neutral-200 dark:border-neutral-800 pb-1 mb-3">
-              Technical Projects
+              Technical Case Studies &amp; Projects
             </h2>
             {projects.map((proj) => (
-              <div key={proj.id} className="mb-3.5">
+              <div key={proj.id} className="mb-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
-                  <span>{proj.title}</span>
+                  <span>{proj.title} ({proj.category})</span>
                   <span className="font-mono text-[11px] font-normal text-neutral-500">
-                    Stack: {proj.technologies.join(', ')}
+                    Stack: {proj.technologies.slice(0, 5).join(', ')}
                   </span>
                 </div>
                 <p className="text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed mt-0.5">
                   {proj.description}
                 </p>
-                <div className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
+                <div className="text-[11px] text-neutral-600 dark:text-neutral-400 mt-1">
+                  <strong>Engineered Solution:</strong> {proj.solution}
+                </div>
+                <div className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">
                   <strong>Key Implementation:</strong> {proj.keyFeatures.slice(0, 2).join(' · ')}
                 </div>
               </div>
@@ -302,7 +307,7 @@ ${certifications.map(c => `• ${c.title} - ${c.issuer} (${c.credentialType})`).
           {/* Section: Certifications */}
           <div>
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 dark:text-white border-b border-neutral-200 dark:border-neutral-800 pb-1 mb-2.5">
-              Certifications & Industry Job Simulations
+              Certifications &amp; Industry Job Simulations
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-neutral-700 dark:text-neutral-300">
               {certifications.map((cert) => (
@@ -319,11 +324,11 @@ ${certifications.map(c => `• ${c.title} - ${c.issuer} (${c.credentialType})`).
         </div>
 
         {/* Footer info banner */}
-        <div className="px-6 py-3 bg-neutral-100 dark:bg-neutral-950/80 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 font-mono no-print">
+        <div className="px-6 py-3.5 bg-neutral-100 dark:bg-neutral-950/80 border-t border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 font-mono no-print">
           <span>ATS Standard 1-Page Layout · Clean Text Parser Ready</span>
           <button
             onClick={onClose}
-            className="hover:text-neutral-900 dark:hover:text-white"
+            className="hover:text-neutral-900 dark:hover:text-white transition-colors"
           >
             Close Viewer
           </button>
