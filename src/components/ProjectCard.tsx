@@ -6,7 +6,7 @@
  * cursor-mode hooks (data-cursor="view"), keyboard access, and deep case study links.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   ExternalLink,
   Github,
@@ -19,6 +19,9 @@ import {
   Terminal,
 } from 'lucide-react';
 import { Project } from '../data/portfolioData';
+import { DistortionPlane } from '../three/DistortionPlane';
+import { sceneManager } from '../three/SceneManager';
+import { PROJECT_THUMBNAILS } from '../data/projectThumbnails';
 
 export interface ProjectCardProps {
   project: Project;
@@ -27,6 +30,30 @@ export interface ProjectCardProps {
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onSelect, index }) => {
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const distortionPlaneRef = useRef<DistortionPlane | null>(null);
+  const thumbnailUrl = PROJECT_THUMBNAILS[project.id] || PROJECT_THUMBNAILS.omnisync;
+
+  useEffect(() => {
+    if (!imageContainerRef.current) return;
+    if (!sceneManager.isAvailable()) return;
+
+    try {
+      distortionPlaneRef.current = new DistortionPlane({
+        id: `distortion-${project.id}-${index}`,
+        domElement: imageContainerRef.current,
+        textureUrl: thumbnailUrl,
+      });
+    } catch (e) {
+      console.warn('DistortionPlane fallback active:', e);
+    }
+
+    return () => {
+      distortionPlaneRef.current?.dispose();
+      distortionPlaneRef.current = null;
+    };
+  }, [project.id, index, thumbnailUrl]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     // Open modal on Enter or Space when card itself has keyboard focus
     if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
@@ -208,6 +235,24 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onSelect, ind
         {/* Right Column: Architectural Highlights & Live Telemetry Panel */}
         <div className="lg:col-span-5 h-full flex flex-col justify-between space-y-4">
           
+          {/* Architectural Topology Blueprint (WebGL Synced Distortion Plane) */}
+          <div
+            ref={imageContainerRef}
+            className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-800/80 shadow-md group/img"
+          >
+            <img
+              src={thumbnailUrl}
+              alt={`${project.title} Architectural Pipeline Topology`}
+              className="w-full h-full object-cover object-center opacity-85 group-hover/img:opacity-100 transition-opacity duration-300 pointer-events-none"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute bottom-2.5 left-3 text-[10px] font-mono text-zinc-400 bg-zinc-900/90 px-2 py-0.5 rounded border border-zinc-700/60 flex items-center gap-1.5 pointer-events-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+              <span>TOPOLOGY_STREAM</span>
+            </div>
+          </div>
+
           {/* Telemetry Strip */}
           <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-zinc-100 space-y-3 font-mono">
             <div className="flex items-center justify-between text-[11px] text-zinc-400 pb-2 border-b border-zinc-800">
